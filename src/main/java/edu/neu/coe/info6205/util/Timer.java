@@ -7,6 +7,8 @@ import java.util.function.UnaryOperator;
 
 public class Timer {
 
+    private static final SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss.SSS");
+
     /**
      * Construct a new Timer and set it running.
      */
@@ -55,7 +57,21 @@ public class Timer {
     public <T, U> double repeat(int n, Supplier<T> supplier, Function<T, U> function, UnaryOperator<T> preFunction, Consumer<U> postFunction) {
         logger.trace("repeat: with " + n + " runs");
         // TO BE IMPLEMENTED: note that the timer is running when this method is called and should still be running when it returns.
-        throw new UnsupportedOperationException();
+        this.running = false;
+        this.ticks = 0;
+        for (int i = 0; i < n; i++) {
+            T supplierValue = supplier.get();
+            if (Objects.nonNull(preFunction))
+                supplierValue = preFunction.apply(supplierValue);
+            resume();
+            U resultArray = function.apply(supplierValue);
+            pauseAndLap();
+            if (Objects.nonNull(postFunction))
+                postFunction.accept(resultArray);
+
+
+        }
+        return meanLapTime();
     }
 
     /**
@@ -174,7 +190,9 @@ public class Timer {
      */
     private static long getClock() {
         // TO BE IMPLEMENTED
-        throw new UnsupportedOperationException();
+        long naTime = System.nanoTime();
+        return naTime;
+
     }
 
     /**
@@ -186,7 +204,8 @@ public class Timer {
      */
     private static double toMillisecs(long ticks) {
         // TO BE IMPLEMENTED
-        throw new UnsupportedOperationException();
+        return ticks * 1000000;
+
     }
 
     final static LazyLogger logger = new LazyLogger(Timer.class);
