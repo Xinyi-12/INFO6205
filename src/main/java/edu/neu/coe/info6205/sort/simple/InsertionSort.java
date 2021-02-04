@@ -52,9 +52,21 @@ public class InsertionSort<X extends Comparable<X>> extends SortWithHelper<X> {
      * @param to   the index of the first element not to sort
      */
     public void sort(X[] xs, int from, int to) {
+
         final Helper<X> helper = getHelper();
 
         // TO BE IMPLEMENTED
+        for (int begin = from + 1; begin < to; begin++) {
+            int cur = begin;
+            while (cur > 0 && helper.compare(xs,cur, cur - 1) < 0) {
+                helper.swap(xs,cur,cur-1);
+                cur--;
+            }
+        }
+
+//        for (X x: xs) {
+//            System.out.print(x + "_");
+//        }
     }
 
     /**
@@ -69,4 +81,50 @@ public class InsertionSort<X extends Comparable<X>> extends SortWithHelper<X> {
 
     public static final String DESCRIPTION = "Insertion sort";
 
+
+
+
+    public static void main(String[] args) throws IOException {
+        int repeatTime = 10;
+        int n = 100;
+
+        Config config = Config.load();
+        Helper<Integer> iHelper = HelperFactory.create("insersionSort", n, config);
+        iHelper.init(n);
+        //create a random array
+        Integer[] arrays = iHelper.random(Integer.class, r -> r.nextInt(2000));
+
+        //random running time
+        double meanTime = new Timer().repeat(repeatTime,() ->arrays, f ->{
+            SortWithHelper<Integer> isort = new InsertionSort<>(iHelper);
+            f = isort.sort(f);
+            return null;
+        });
+        System.out.println("【random】 " + meanTime);
+
+        //order running time
+        UnaryOperator<Integer[]> ascOrder = t->{
+          return Arrays.stream(t).sorted(Comparator.naturalOrder()).toArray(Integer[]::new);
+        };
+        meanTime = new Timer().repeat(repeatTime,() -> arrays,f->{
+            SortWithHelper<Integer> isort = new InsertionSort<>(iHelper);
+            f = isort.sort(f);
+            return null;
+        },ascOrder,null);
+        System.out.println("【order】 " + meanTime);
+
+        //reserved running time
+        UnaryOperator<Integer[]> descOrder = t->{
+          return Arrays.stream(t).sorted(Comparator.reverseOrder()).toArray(Integer[]::new);
+        };
+
+        meanTime = new Timer().repeat(repeatTime,()-> arrays,f->{
+            SortWithHelper<Integer> isort = new InsertionSort<>(iHelper);
+            f = isort.sort(f);
+            return null;
+        },descOrder,null);
+        System.out.println("【reserved order】 " + meanTime);
+
+    }
 }
+
