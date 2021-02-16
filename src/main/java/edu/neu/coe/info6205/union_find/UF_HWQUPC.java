@@ -8,6 +8,7 @@
 package edu.neu.coe.info6205.union_find;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Height-weighted Quick Union with Path Compression
@@ -82,6 +83,13 @@ public class UF_HWQUPC implements UF {
         validate(p);
         int root = p;
         // TO BE IMPLEMENTED
+        while (root != getParent(root)) {
+            if (pathCompression){
+                doPathCompression(root);
+            }
+            root = getParent(root);
+
+        }
         return root;
     }
 
@@ -168,7 +176,16 @@ public class UF_HWQUPC implements UF {
     private boolean pathCompression;
 
     private void mergeComponents(int i, int j) {
-        // TO BE IMPLEMENTED make shorter root point to taller one
+        // TO BE IMPLEME1NTED make shorter root point to taller one
+        if (i == j) return;
+        if (height[i] < height[j]) {
+            updateParent(i,j);
+        } else if (height[i] > height[j]){
+            updateParent(j,i);
+        }else{
+            updateParent(i,j);
+            updateHeight(j,i);
+        }
     }
 
     /**
@@ -176,5 +193,33 @@ public class UF_HWQUPC implements UF {
      */
     private void doPathCompression(int i) {
         // TO BE IMPLEMENTED update parent to value of grandparent
+
+        updateParent(i,getParent(getParent(i)));
     }
+
+
+    public static void main(String[] args) {
+        Random random = new Random();
+        for (int time = 0; time < 100 ; time ++){
+            int n = random.nextInt(900);
+            int count = count(n);
+            System.out.println("n:" + n + " " +"count:" + count);
+        }
+    }
+
+    private static int count(int n) {
+        UF_HWQUPC client = new UF_HWQUPC(n);
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                if (!client.isConnected(i, j)) {
+                    client.union(i, j);
+                    //System.out.println(i + " " + j);
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
 }
